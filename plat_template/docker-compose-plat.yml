@@ -1,0 +1,59 @@
+version: '3.3'
+
+services:  
+  # 平台
+  postgres_platform:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: ppcp
+      POSTGRES_USER: root
+    networks:
+      - appnet
+  zookeeper:
+    image: zookeeper:latest
+    ports:
+      - 2181:2181
+    networks:
+      - appnet
+  platform:
+    build: "${RegistryURI}/ppcp:${TAG}"
+    environment:
+      - DB_URI=postgres://root:123456@postgres_platform:5432/ppcp
+      - ZK_HOST=zookeeper
+      - ZK_PORT=2181
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=123456
+      - PLATFORM_SECRET=thisisplatform
+    volumes:
+      - ../:/data/app
+    ports:
+      - 5555:8000
+    networks:
+      - appnet
+    command: sh -c "aerich upgrade &&uvicorn ppcp.entry:app --host 0.0.0.0 "
+    depends_on:
+      - postgres_platform
+      - zookeeper
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123456
+    networks:
+      - appnet
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - appnet
+  platform_page:
+    image: "${RegistryURI}/web_ppcp:${TAG}"
+    ports:
+      - 8080:80

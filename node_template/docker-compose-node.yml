@@ -1,0 +1,57 @@
+version: '3.3'
+
+services:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123456
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ./data:/data
+    command: server /data --console-address ":9001"
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: ppcn
+      POSTGRES_USER: root
+
+  fl-scheduler:
+    image: "${RegistryURI}/fl-scheduler:${TAG}"
+    ports:
+      - 8000:8000
+    environment:
+      - CONSTANT_SETTINGS_FILE=/opt/FL-Scheduler/config/constant_settings.yaml
+    volumes:
+      - ./fl_config:/opt/FL-Scheduler/config
+
+  ppcn:
+    image: "${RegistryURI}/ppcn:{TAG}"
+    ports:
+      - 10000:10000
+    command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --env-file=.env --port=10000 --host=0.0.0.0"
+    environment:
+      - DB_URI=postgres://root:123456@postgres:5432/ppcn
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - minio
+      - fl-scheduler
+
+  front_end:
+    image: "${RegistryURI}/ppcn-frontend:${TAG}"
+    ports:
+      - 8081:80
