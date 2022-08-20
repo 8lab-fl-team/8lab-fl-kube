@@ -47,6 +47,7 @@ Deploy() {
     if [ "$1" != "" ]; then
         case $1 in
         all)
+            echo ${RegistryURI}
             docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up
             docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml up
             ;;
