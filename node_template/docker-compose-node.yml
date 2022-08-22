@@ -1,10 +1,18 @@
 version: '3.3'
 
+networks:
+  appnet:
+    ipam:
+      driver: default
+
 services:
   redis:
     image: redis
     ports:
       - 6379:6379
+    networks:
+      - appnet
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -13,6 +21,7 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=123456
+
   minio:
     image: quay.io/minio/minio
     ports:
@@ -21,6 +30,7 @@ services:
     volumes:
       - ./data:/data
     command: server /data --console-address ":9001"
+
   postgres:
     image: postgres:14
     environment:
@@ -36,9 +46,11 @@ services:
       - CONSTANT_SETTINGS_FILE=/opt/FL-Scheduler/config/constant_settings.yaml
     volumes:
       - ./fl_config:/opt/FL-Scheduler/config
+    networks:
+      - appnet
 
   ppcn:
-    image: "${RegistryURI}/ppcn:{TAG}"
+    image: "${RegistryURI}/ppcn:${TAG}"
     ports:
       - 10000:10000
     command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --env-file=.env --port=10000 --host=0.0.0.0"
@@ -50,8 +62,12 @@ services:
       - rabbitmq
       - minio
       - fl-scheduler
+    networks:
+      - appnet
 
   front_end:
     image: "${RegistryURI}/ppcn-frontend:${TAG}"
     ports:
       - 8081:80
+    networks:
+      - appnet
