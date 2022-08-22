@@ -12,23 +12,39 @@ ShowUsage() {
 	echo "Deploy all parties or specified partie(s): bash docker_deploy.sh [--down] node | platform | all"
 }
 
+Deploy_platform() {
+    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up -d
+}
+
+Deploy_node() {
+    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml up -d
+}
+
+Delete_platform() {
+    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml down
+}
+
+Delete_node() {
+    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml down
+}
+
 Delete() {
     if [ "$1" = "" ]; then
 		echo "No system was provided, please check your arguments "
 		exit 1
-	fi 
+	fi
 
     if [ "$1" != "" ]; then
         case $1 in
         all)
-            docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml down 
-            docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml down 
+            Delete_platform
+	    Delete_node
             ;;
         platform)
-            docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml down 
+            Delete_platform
             ;;
         node)
-            docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml down 
+	    Delete_node
             ;;
         *)
             echo 'no matched'
@@ -42,20 +58,19 @@ Deploy() {
     if [ "$1" = "" ]; then
 		echo "No system was provided, please check your arguments "
 		exit 1
-	fi 
+	fi
 
     if [ "$1" != "" ]; then
         case $1 in
         all)
-            echo ${RegistryURI}
-            docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up
-            docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml up
+            Deploy_platform
+	    Deploy_node
             ;;
         platform)
-            docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up 
+            Deploy_platform
             ;;
         node)
-            docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node1.yml up 
+	    Deploy_node
             ;;
         *)
             echo "unsupported system"
