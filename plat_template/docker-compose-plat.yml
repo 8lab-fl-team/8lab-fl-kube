@@ -5,7 +5,7 @@ networks:
     ipam:
       driver: default
 
-services:  
+services:
   # 平台
   postgres_platform:
     image: postgres:14
@@ -46,7 +46,7 @@ services:
     image: rabbitmq:3-management
     ports:
       - 15672:15672
-      - 5672:5672
+      - 5673:5672
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=123456
@@ -62,6 +62,6 @@ services:
   platform_page:
     image: "${RegistryURI}/web_ppcp:${TAG}"
     environment:
-      - VUE_APP_BASE_API=101.251.211.195:5555 
+      - VUE_APP_BASE_API=101.251.211.195:5555
     ports:
       - 8080:80
