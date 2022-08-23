@@ -1,0 +1,65 @@
+FL_DATABASE:
+    name: 'test_database.sqlite3'
+    type: 'sqlite3' # mysql / sqlite
+    kwargs:
+      ~
+    # 'name': 'fl_database',
+    # 'type': 'mysql', # mysql / sqlite
+    # 'kwargs': {
+    #     'user': 'root',
+    #     'password': '',
+    # },
+    # 'kwargs': {
+    #     'user': 'root',
+    #     'password': '',
+    #     'host': '152.136.245.123'
+    # },
+
+DEFAULT_STORAGE_CONF:
+        #    mysql:
+        #        user: root
+        #        passwd: ''
+        #        db: storage_db
+        #        host: localhost
+    sqlite:
+        db: db.sqlite3
+    postgre:
+        host: part_1_pg
+        post: 5432
+        user: root
+        db: ppcp
+        passwd: 123456
+    hdfs:
+    - namenode: http://101.251.211.195:50070
+      path: ''
+
+DEFAULT_COMPUTING_CONF:
+    local_file: ~
+    spark:  ~
+            #- host: 101.251.211.195
+            #port: 7077
+
+JOB_ID_CONTROLLER:
+    path: 'controller.job_id_controller.controller_redis.JobIdController'
+    args:
+        host: redis
+        port: 6379
+        pwd: ~
+        db: 0
+    #    path: controller.job_id_controller.controller_file.JobIdController
+    #args:
+    #    file_name: .count.txt
+
+NODE_CONTROLLER:
+    path: node_manager.zookeeper.NodeController
+    args:
+        zk_ip: host.docker.internal:2181
+
+LOCAL_IP: 192.168.50.26
+FL_NAME: FL_NAME
+FL_CONTACT: FL_CONTACT
+FL_ENTITY_NAME: FL_ENTITY_NAME
+FL_TEL: FL_TEL
+
+RECOMMAND_DELAY_TIME: 1 # seconds
+FEDERATION_TIMEOUT: 600 # seconds

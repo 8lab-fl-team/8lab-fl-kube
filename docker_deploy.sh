@@ -13,19 +13,20 @@ ShowUsage() {
 }
 
 Deploy_platform() {
-    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up -d
+    RegistryURI=${RegistryURI} TAG=${TAG} PPCP_RESTFUL_API=${PPCP_RESTFUL_API} docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml up -d
 }
 
 Deploy_node() {
-    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml up -d
+    echo ${NODE_RESTFUL_API}
+    RegistryURI=${RegistryURI} TAG=${TAG} NODE_RESTFUL_API=${NODE_RESTFUL_API} docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml up -d
 }
 
 Delete_platform() {
-    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml down
+    docker-compose -f ${WORKINGDIR}/plat_template/docker-compose-plat.yml down
 }
 
 Delete_node() {
-    RegistryURI=${RegistryURI} TAG=${TAG} docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml down
+    docker-compose -f ${WORKINGDIR}/node_template/docker-compose-node.yml down
 }
 
 Delete() {

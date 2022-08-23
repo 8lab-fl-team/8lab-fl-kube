@@ -23,8 +23,9 @@ services:
       - 2181:2181
     networks:
       - appnet
+
   platform:
-    image: "${RegistryURI}/ppcp:${TAG}"
+    image: "${RegistryURI}/ppcp:20220823"
     environment:
       - DB_URI=postgres://root:123456@postgres_platform:5432/ppcp
       - ZK_HOST=zookeeper
@@ -32,16 +33,14 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=123456
       - PLATFORM_SECRET=thisisplatform
-    volumes:
-      - ../:/data/app
     ports:
       - 5555:8000
     networks:
       - appnet
-    command: sh -c "aerich upgrade &&uvicorn ppcp.entry:app --host 0.0.0.0 "
     depends_on:
       - postgres_platform
       - zookeeper
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -62,6 +61,6 @@ services:
   platform_page:
     image: "${RegistryURI}/web_ppcp:${TAG}"
     environment:
-      - VUE_APP_BASE_API=101.251.211.195:5555
+      - VUE_APP_BASE_API=${PPCP_RESTFUL_API}
     ports:
       - 8080:80
