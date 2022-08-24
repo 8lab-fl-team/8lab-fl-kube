@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.8'
 
 networks:
   appnet:
@@ -16,7 +16,17 @@ services:
       MYSQL_ROOT_PASSWORD: qifenbao602
     networks:
       - appnet
-      
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123456
+    networks:
+      - appnet
+
   minio:
     image: quay.io/minio/minio
     ports:
@@ -25,6 +35,8 @@ services:
     volumes:
       - ./minio/data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - appnet
 
   postgres:
     image: postgres:14
@@ -36,36 +48,60 @@ services:
       - appnet
 
   fl-scheduler:
-    image: "${RegistryURI}/fl-scheduler:${TAG}"
+    image:  101.251.207.188:5000/fl-scheduler:hczy
     ports:
       - 8000:8000
+      - 8443:8443
+      - 1222:1222
+      - 1212:1212
     environment:
       - CONSTANT_SETTINGS_FILE=/opt/FL-Scheduler/config/constant_settings.yaml
     volumes:
       - ./fl-scheduler/config:/opt/FL-Scheduler/config
+      - ./fl-scheduler/.node_info:/opt/FL-Scheduler/python/.node_info
+      - ./fl-scheduler/var:/opt/FL-Scheduler/python/var
+    cpus: 4
+    mem_limit: 16G
+    shm_size: 300m
+    networks:
+      - appnet
+
+  page:
+    image: 101.251.207.188:5000/ppcn-frontend:hczy
+    env_file:
+      - ../.env
+    environment:
+      - API=http://${IP}:10000
+    ports:
+      - 50000:80
     networks:
       - appnet
 
   ppcn:
-    image: "${RegistryURI}/ppcn:hczy"
+    image: 101.251.207.188:5000/ppcn:20220719
     ports:
       - 10000:10000
+    command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
+    env_file:
+      - ../.env
+    volumes:
+      - /proc:/proc_out:ro
     environment:
-      - MINIO_SK=minioadmin
-      - DIAGRAM_RENDER_URL=http://diagram_render:8000
-      - ADDR=http://ppcn:10000
       - DB_URI=postgres://root:123456@postgres:5432/ppcn
-      - IP=192.168.50.26
-      - LOCAL_HOST=192.168.50.26
-      - LOCAL_IP=192.168.50.26
-      - PLATFORM_SECRET=part1
-      - LOCAL_PORT=10000
-      - CLIENT_ENDPOINT=http://192.168.50.26:8000
-      - MINIO_ENDPOINT=192.168.50.26:9000
+      - ADDR=http://ppcn:10000
+      - MINIO_ENDPOINT=${IP}:9000
       - MINIO_AK=minioadmin
+      - MINIO_SK=minioadmin
+      - CLIENT_ENDPOINT=http://${IP}:8000
+      - LOCAL_IP=${IP}
+      - LOCAL_HOST=${IP}
+      - LOCAL_PORT=10000
+      - PLATFORM_SECRET=thisipart119
       - DB_SCHEDULER_URI=mysql://root:qifenbao602@mysql:3306/fl_database
+      - DIAGRAM_RENDER_URL=http://diagram_render:8000
     depends_on:
       - postgres
+      - rabbitmq
       - minio
       - fl-scheduler
     networks:
@@ -73,12 +109,5 @@ services:
 
   diagram_render:
     image: 101.251.207.188:5000/plot:1.1
-
-  front_end:
-    image: "${RegistryURI}/ppcn-frontend:hczy"
-    environment:
-      - VUE_APP_BASE_API=${NODE_RESTFUL_API}
-    ports:
-      - 8081:80
     networks:
       - appnet
