@@ -1,0 +1,67 @@
+FL_DATABASE:
+  name: fl_database
+  type: mysql # mysql
+  kwargs:
+    user: root
+    password: qifenbao602
+    # host: 192.168.50.26
+    host: mysql
+    port: 3306
+
+DEFAULT_STORAGE_CONF:
+  mysql:
+    user: root
+    passwd: "qifenbao602"
+    db: storage_db
+    host: mysql
+    port: 3306
+  sqlite:
+    db: db.sqlite3
+  localfile:
+    use: true
+  postgres:
+    host: postgres
+    port: 5432
+    user: root
+    db: ppcn
+    passwd: 123456
+
+DEFAULT_COMPUTING_CONF:
+  local_file: ~
+  spark: ~
+
+JOB_ID_CONTROLLER:
+  path: controller.job_id_controller.controller_timestamp.JobIdController
+  args:
+    random_length: 6
+
+NODE_CONTROLLER:
+  path: node_manager.octa.NodeController
+  args:
+    host: ppcn
+    port: 10000
+    protocol: http
+
+LOCAL_IP: 192.168.50.26
+NOTIFY_URL: http://ppcn:10000/callback
+FL_NAME: FL_NAME
+FL_CONTACT: FL_CONTACT
+FL_ENTITY_NAME: FL_ENTITY_NAME
+FL_TEL: FL_TEL
+
+RECOMMAND_DELAY_TIME: 1 # seconds
+FEDERATION_TIMEOUT: 84600 # seconds
+FEDERATION_RABBITMQ_PARTITION_SIZE: 4194304 # 4 * 1024 * 1024 # 4MB
+FEDERATION:
+  rabbitmq:
+    host: 192.168.50.26
+    user: admin
+    password: 123456
+    port: 5672
+    ssl: false
+
+    http_port: 15672
+    http_host: rabbitmq
+    http_protocal: http
+HEARTBEAT: 3
+LOSTHEARTBEAT: 60

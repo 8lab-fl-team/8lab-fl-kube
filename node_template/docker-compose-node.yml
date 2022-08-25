@@ -1,57 +1,113 @@
-version: '3.3'
+version: '3.8'
+
+networks:
+  appnet:
+    ipam:
+      driver: default
 
 services:
-  redis:
-    image: redis
-    ports:
-      - 6379:6379
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - ./fl-scheduler/mysql/data:/var/lib/mysql
+      - ./fl-scheduler/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4
+    environment:
+      MYSQL_ROOT_PASSWORD: qifenbao602
+    networks:
+      - appnet
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - 15672:15672
       - 5672:5672
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=123456
+    networks:
+      - appnet
+
   minio:
     image: quay.io/minio/minio
     ports:
       - 9000:9000
       - 9001:9001
     volumes:
-      - ./data:/data
+      - ./minio/data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - appnet
+
   postgres:
     image: postgres:14
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: ppcn
       POSTGRES_USER: root
+    networks:
+      - appnet
 
   fl-scheduler:
-    image: "${RegistryURI}/fl-scheduler:${TAG}"
+    image:  101.251.207.188:5000/fl-scheduler:hczy
     ports:
       - 8000:8000
+      - 8443:8443
+      - 1222:1222
+      - 1212:1212
     environment:
       - CONSTANT_SETTINGS_FILE=/opt/FL-Scheduler/config/constant_settings.yaml
     volumes:
-      - ./fl_config:/opt/FL-Scheduler/config
+      - ./fl-scheduler/config:/opt/FL-Scheduler/config
+      - ./fl-scheduler/.node_info:/opt/FL-Scheduler/python/.node_info
+      - ./fl-scheduler/var:/opt/FL-Scheduler/python/var
+    cpus: 4
+    mem_limit: 16G
+    shm_size: 300m
+    networks:
+      - appnet
+
+  page:
+    image: 101.251.207.188:5000/ppcn-frontend:hczy
+    env_file:
+      - ../.env
+    environment:
+      - API=http://${IP}:10000
+    ports:
+      - 50000:80
+    networks:
+      - appnet
 
   ppcn:
-    image: "${RegistryURI}/ppcn:{TAG}"
+    image: 101.251.207.188:5000/ppcn:20220719
     ports:
       - 10000:10000
-    command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --env-file=.env --port=10000 --host=0.0.0.0"
+    command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
+    env_file:
+      - ../.env
+    volumes:
+      - /proc:/proc_out:ro
     environment:
       - DB_URI=postgres://root:123456@postgres:5432/ppcn
+      - ADDR=http://ppcn:10000
+      - MINIO_ENDPOINT=${IP}:9000
+      - MINIO_AK=minioadmin
+      - MINIO_SK=minioadmin
+      - CLIENT_ENDPOINT=http://${IP}:8000
+      - LOCAL_IP=${IP}
+      - LOCAL_HOST=${IP}
+      - LOCAL_PORT=10000
+      - PLATFORM_SECRET=thisipart119
+      - DB_SCHEDULER_URI=mysql://root:qifenbao602@mysql:3306/fl_database
+      - DIAGRAM_RENDER_URL=http://diagram_render:8000
     depends_on:
       - postgres
-      - redis
       - rabbitmq
       - minio
       - fl-scheduler
+    networks:
+      - appnet
 
-  front_end:
-    image: "${RegistryURI}/ppcn-frontend:${TAG}"
-    ports:
-      - 8081:80
+  diagram_render:
+    image: 101.251.207.188:5000/plot:1.1
+    networks:
+      - appnet
