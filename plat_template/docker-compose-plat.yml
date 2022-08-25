@@ -1,7 +1,7 @@
 version: '3.3'
 
 networks:
-  appnet:
+  platappnet:
     ipam:
       driver: default
 
@@ -9,23 +9,15 @@ services:
   # 平台
   postgres_platform:
     image: postgres:14
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: ppcp
       POSTGRES_USER: root
     networks:
-      - appnet
-  zookeeper:
-    image: zookeeper:latest
-    ports:
-      - 2181:2181
-    networks:
-      - appnet
+      - platappnet
 
   platform:
-    image: "${RegistryURI}/ppcp:20220823"
+    image: "101.251.207.188:5000/ppcp:hczy"
     environment:
       - DB_URI=postgres://root:123456@postgres_platform:5432/ppcp
       - ZK_HOST=zookeeper
@@ -36,31 +28,15 @@ services:
     ports:
       - 5555:8000
     networks:
-      - appnet
+      - platappnet
     depends_on:
       - postgres_platform
-      - zookeeper
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - 15672:15672
-      - 5673:5672
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=123456
-    networks:
-      - appnet
-  redis:
-    image: redis
-    ports:
-      - 6379:6379
-    networks:
-      - appnet
 
   platform_page:
-    image: "${RegistryURI}/web_ppcp:${TAG}"
+    image: "101.251.207.188:5000/ppcp-frontend:hczy"
     environment:
-      - VUE_APP_BASE_API=${PPCP_RESTFUL_API}
+      - VUE_APP_BASE_API=${IP}:5555
     ports:
       - 8080:80
+    env_file:
+      - .env
