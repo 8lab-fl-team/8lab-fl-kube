@@ -69,7 +69,7 @@ services:
   page:
     image: 101.251.207.188:5000/ppcn-frontend:hczy
     env_file:
-      - ../.env
+      - .env
     environment:
       - API=http://${IP}:10000
     ports:
@@ -83,7 +83,7 @@ services:
       - 10000:10000
     command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
     env_file:
-      - ../.env
+      - .env
     volumes:
       - /proc:/proc_out:ro
     environment:
