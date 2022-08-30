@@ -78,7 +78,7 @@ services:
       - appnet
 
   ppcn:
-    image: 101.251.207.188:5000/ppcn:20220719
+    image: 101.251.207.188:5000/ppcn:hczy
     ports:
       - 10000:10000
     command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
