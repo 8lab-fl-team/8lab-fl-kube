@@ -3,8 +3,6 @@ BASEDIR=$(dirname "$0")
 cd $BASEDIR
 WORKINGDIR=$(pwd)
 
-source ${WORKINGDIR}/.env
-
 cd ${WORKINGDIR}
 
 ShowUsage() {
