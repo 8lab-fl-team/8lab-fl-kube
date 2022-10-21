@@ -48,7 +48,7 @@ services:
       - appnet
 
   fl-scheduler:
-    image:  101.251.207.188:5000/fl-scheduler:hczy
+    image:  101.251.207.188:5000/fl-scheduler:20221019
     ports:
       - 8000:8000
       - 8443:8443
@@ -67,7 +67,7 @@ services:
       - appnet
 
   page:
-    image: 101.251.207.188:5000/ppcn-frontend:hczy
+    image: 101.251.207.188:5000/ppcn-frontend:20221019
     env_file:
       - .env
     environment:
@@ -78,7 +78,7 @@ services:
       - appnet
 
   ppcn:
-    image: 101.251.207.188:5000/ppcn:20220719
+    image: 101.251.207.188:5000/ppcn-backend:20221019
     ports:
       - 10000:10000
     command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
@@ -108,6 +108,6 @@ services:
       - appnet
 
   diagram_render:
-    image: 101.251.207.188:5000/plot:1.1
+    image: 101.251.207.188:5000/plot:20221019
     networks:
       - appnet

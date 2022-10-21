@@ -2,10 +2,10 @@ FL_DATABASE:
   name: fl_database
   type: mysql # mysql
   kwargs:
-    user: root
-    password: qifenbao602
+    user: "root"
+    password: "qifenbao602"
     # host: 192.168.50.26
-    host: mysql
+    host: "mysql"
     port: 3306
 
 DEFAULT_STORAGE_CONF:
@@ -42,7 +42,7 @@ NODE_CONTROLLER:
     port: 10000
     protocol: http
 
-LOCAL_IP: 192.168.50.26
+LOCAL_IP: 101.251.207.189
 NOTIFY_URL: http://ppcn:10000/callback
 FL_NAME: FL_NAME
 FL_CONTACT: FL_CONTACT
@@ -54,7 +54,7 @@ FEDERATION_TIMEOUT: 84600 # seconds
 FEDERATION_RABBITMQ_PARTITION_SIZE: 4194304 # 4 * 1024 * 1024 # 4MB
 FEDERATION:
   rabbitmq:
-    host: 192.168.50.26
+    host: 101.251.207.189
     user: admin
     password: 123456
     port: 5672
