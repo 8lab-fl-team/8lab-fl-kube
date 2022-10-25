@@ -15,9 +15,12 @@ services:
       POSTGRES_USER: root
     networks:
       - platappnet
-
+  cache:
+    image: redis
+    networks:
+      - platappnet
   platform:
-    image: "101.251.207.188:5000/ppcp:hczy"
+    image: "${RegistryURI}/ppcp-backend:${TAG}"
     environment:
       - DB_URI=postgres://root:123456@postgres_platform:5432/ppcp
       - ZK_HOST=zookeeper
@@ -25,18 +28,24 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=123456
       - PLATFORM_SECRET=thisisplatform
+      - TZ=UTC
+      - REDIS_HOST=cache
     ports:
       - 5555:8000
+    command: sh -c "aerich upgrade &&uvicorn ppcp.entry:app --host 0.0.0.0"
     networks:
       - platappnet
     depends_on:
       - postgres_platform
 
   platform_page:
-    image: "101.251.207.188:5000/ppcp-frontend:hczy"
+    image: "${RegistryURI}/ppcp-frontend:${TAG}"
     environment:
-      - VUE_APP_BASE_API=${IP}:5555
+      - API_PREFIX=/backend-api/
+      - API=http://${IP}:5555
     ports:
       - 8080:80
+    # volumes:
+    #   - ./nginx_templates/default.conf.template:/etc/nginx/templates/default.conf.template
     env_file:
       - .env

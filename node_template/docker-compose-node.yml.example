@@ -31,7 +31,6 @@ services:
     image: quay.io/minio/minio
     ports:
       - 9000:9000
-      - 9001:9001
     volumes:
       - ./minio/data:/data
     command: server /data --console-address ":9001"
@@ -48,7 +47,7 @@ services:
       - appnet
 
   fl-scheduler:
-    image:  101.251.207.188:5000/fl-scheduler:20221019
+    image: ${RegistryURI}/fl-scheduler:${TAG}
     ports:
       - 8000:8000
       - 8443:8443
@@ -67,7 +66,7 @@ services:
       - appnet
 
   page:
-    image: 101.251.207.188:5000/ppcn-frontend:20221019
+    image: ${RegistryURI}/ppcn-frontend:${TAG}
     env_file:
       - .env
     environment:
@@ -78,7 +77,7 @@ services:
       - appnet
 
   ppcn:
-    image: 101.251.207.188:5000/ppcn-backend:20221019
+    image: ${RegistryURI}/ppcn-backend:${TAG}
     ports:
       - 10000:10000
     command: sh -c "aerich upgrade && uvicorn ppcn.entry:app --reload --port=10000 --host=0.0.0.0"
@@ -100,6 +99,7 @@ services:
       - DB_SCHEDULER_URI=mysql://root:qifenbao602@mysql:3306/fl_database
       - DIAGRAM_RENDER_URL=http://diagram_render:8000
     depends_on:
+      - mysql
       - postgres
       - rabbitmq
       - minio
@@ -108,6 +108,6 @@ services:
       - appnet
 
   diagram_render:
-    image: 101.251.207.188:5000/plot:20221019
+    image: ${RegistryURI}/plot:1.2
     networks:
       - appnet

@@ -1,0 +1,31 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name localhost;
+
+    #access_log  /var/log/nginx/host.access.log  main;
+    gzip on; # 是否开启gzip
+    gzip_buffers 32 128K; # 缓冲(压缩在内存中缓冲几块? 每块多大?)
+    gzip_comp_level 5;
+    gzip_min_length 1k;
+    gzip_vary on; # 是否传输gzip压缩标志
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+    }
+
+    location ${API_PREFIX} {
+        proxy_pass ${API}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+
+        root /usr/share/nginx/html;
+
+    }
+}

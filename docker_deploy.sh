@@ -80,12 +80,12 @@ Deploy() {
 }
 
 main() {
-	if [ "$1" = "" ] || [ "$" = "--help" ]; then
+	if [ "$1" = "" ] || [ "$1" = "--help" ]; then
 		ShowUsage
 		exit 1
 	elif [ "$1" = "--down" ]; then
 		shift
-		Delete $@
+		Delete "$@"
 	else
 		Deploy "$@"
 	fi
